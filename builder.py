@@ -53,12 +53,12 @@ def octsegformer_small(in_channels, out_channels, **kwargs):
 def octsegformer_cls(in_channels, out_channels, nemtpy, **kwargs):
   return models.OctFormerCls(
       in_channels, out_channels,
-      channels=[96, 192],
-      num_blocks=[6, 6],
-      num_heads=[6, 12],
+      channels=[32, 32],
+      num_blocks=[2, 2],
+      num_heads=[2, 2],
       patch_size=32, dilation=2,
-      drop_path=0.5, nempty=nemtpy,
-      stem_down=2, head_drop=0.5)
+      drop_path=0.0, nempty=nemtpy,
+      stem_down=1, head_drop=0.0)
 
 
 def get_segmentation_model(flags):

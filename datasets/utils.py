@@ -11,30 +11,35 @@ from plyfile import PlyData
 
 
 class ReadPly:
+    def __init__(self, has_normal: bool = True, has_color: bool = False,
+                 has_label: bool = False):
+        self.has_normal = has_normal
+        self.has_color = has_color
+        self.has_label = has_label
 
-  def __init__(self, has_normal: bool = True, has_color: bool = False,
-               has_label: bool = False):
-    self.has_normal = has_normal
-    self.has_color = has_color
-    self.has_label = has_label
-
-  def __call__(self, filename: str):
-    plydata = PlyData.read(filename)
-    vtx = plydata['vertex']
-
-    output = dict()
-    points = np.stack([vtx['x'], vtx['y'], vtx['z']], axis=1)
-    output['points'] = points.astype(np.float32)
-    if self.has_normal:
-      normal = np.stack([vtx['nx'], vtx['ny'], vtx['nz']], axis=1)
-      output['normals'] = normal.astype(np.float32)
-    if self.has_color:
-      color = np.stack([vtx['red'], vtx['green'], vtx['blue']], axis=1)
-      output['colors'] = color.astype(np.float32)
-    if self.has_label:
-      label = vtx['label']
-      output['labels'] = label.astype(np.int32)
-    return output
+    def __call__(self, filename: str):
+        plydata = PlyData.read(filename)
+        vtx = plydata['vertex']
+        # print(vtx.data.dtype.names)
+        output = dict()
+        points = np.stack([vtx['x'], vtx['y'], vtx['z']], axis=1)
+        output['points'] = points.astype(np.float32)
+        
+        if self.has_normal:
+            normal = np.stack([vtx['nx'], vtx['ny'], vtx['nz']], axis=1)
+            output['normals'] = normal.astype(np.float32)
+        
+        if self.has_color:
+            color = np.stack([vtx['red'], vtx['green'], vtx['blue']], axis=1)
+            output['colors'] = color.astype(np.float32)
+        
+        if self.has_label:
+            # Now reading the ptau field, which is a float.
+            ptau = vtx['ptau']
+            output['labels'] = ptau.astype(np.float32)
+        # output['ptau'] = vtx['ptau']
+        
+        return output
 
 
 class ReadNpz:

@@ -10,17 +10,17 @@ import torch.nn.functional as F
 import ocnn
 
 from thsolver import Solver
-from datasets import get_modelnet40_dataset
+from datasets import get_modelnet40_dataset,get_tetmesh_dataset
 from builder import get_classification_model
 
 
 class ClsSolver(Solver):
-
+  
   def get_model(self, flags):
     return get_classification_model(flags)
 
   def get_dataset(self, flags):
-    return get_modelnet40_dataset(flags)
+    return get_tetmesh_dataset(flags)
 
   def get_input_feature(self, octree):
     flags = self.FLAGS.MODEL
@@ -29,9 +29,18 @@ class ClsSolver(Solver):
     return data
 
   def forward(self, batch):
-    octree, label = batch['octree'].cuda(), batch['label'].cuda()
+    # 
+    # print( batch['ptau'],  batch['label'])
+    octree, label, ptau = batch['octree'].cuda(), batch['label'].cuda(), batch['ptau'].cuda()
+   
+    # xyz = octree['xyz']  # Assuming the point cloud data is stored in 'xyz'
+    
+    # # Print the xyz coordinates for the current batch
+    # print(f"XYZ Coordinates: {xyz}")
     data = self.get_input_feature(octree)
-    logits = self.model(data, octree, octree.depth)
+    # print(data.shape)
+    logits = self.model(data, octree, octree.depth,ptau)
+    
     log_softmax = F.log_softmax(logits, dim=1)
     loss = F.nll_loss(log_softmax, label)
     pred = torch.argmax(logits, dim=1)
