@@ -39,10 +39,13 @@ def read_file(filename: str):
 
 
 def get_tetmesh_dataset(flags):
+  # print(type(flags))
   transform = TetTransform(flags)
+  transform2 = TetTransform(flags)
   collate_batch = CollateBatch()
-
-  dataset = Dataset(flags.location, flags.filelist, transform,
+  # print(flags.adaptive)
+  dataset = Dataset(flags.location,flags.location2, flags.filelist,flags.filelist, transform,transform2,
                     read_file=read_file, take=flags.take)
+  # print(dataset[1])
   # pdb.set_trace()
   return dataset, collate_batch

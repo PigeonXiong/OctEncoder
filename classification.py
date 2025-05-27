@@ -24,6 +24,7 @@ class ClsSolver(Solver):
 
   def get_input_feature(self, octree):
     flags = self.FLAGS.MODEL
+    # print(flags)
     octree_feature = ocnn.modules.InputFeature(flags.feature, flags.nempty)
     data = octree_feature(octree)
     return data
@@ -31,16 +32,16 @@ class ClsSolver(Solver):
   def forward(self, batch):
     # 
     # print( batch['ptau'],  batch['label'])
-    octree, label, ptau = batch['octree'].cuda(), batch['label'].cuda(), batch['ptau'].cuda()
+    octree, octree2, label, ptau = batch['octree'].cuda(), batch['octree2'].cuda(), batch['label'].cuda(), batch['ptau'].cuda()
    
     # xyz = octree['xyz']  # Assuming the point cloud data is stored in 'xyz'
     
     # # Print the xyz coordinates for the current batch
     # print(f"XYZ Coordinates: {xyz}")
     data = self.get_input_feature(octree)
+    data2 = self.get_input_feature(octree2)
     # print(data.shape)
-    logits = self.model(data, octree, octree.depth,ptau)
-    
+    logits = self.model(data, data2, octree,octree2, octree.depth, octree2.depth,ptau)
     log_softmax = F.log_softmax(logits, dim=1)
     loss = F.nll_loss(log_softmax, label)
     pred = torch.argmax(logits, dim=1)

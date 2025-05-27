@@ -8,3 +8,4 @@
 from .octformer import OctFormer
 from .octformerseg import OctFormerSeg
 from .octformercls import OctFormerCls
+from .octformer_mae import OctFormerMAE

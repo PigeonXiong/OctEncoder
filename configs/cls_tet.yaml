@@ -11,16 +11,16 @@ SOLVER:
   type: adamw
   best_val: max:accu
 
-  logdir: logs/m40/octformer_d42
-  max_epoch: 400
+  logdir: logs/m40/octformer_d122
   test_every_epoch: 1
   log_per_iter: 100
 
   lr: 0.001
   lr_type: step
-  weight_decay: 0.5
-  milestones: (120,160)
-  ckpt_num: 200
+
+  weight_decay: 0.01
+  milestones: (100,150)
+  ckpt_num: 400
 
   checkpoint: ""  # Set to empty string to disable checkpoint loading
   resume: false    # Ensure we don't resume from checkpoint
@@ -42,8 +42,10 @@ DATA:
     jitter: 0.00
 
     # data loading
-    location: data/tet
-    filelist: data/tet/filelist/binary_train.txt
+    location: data/adni
+    filelist: data/adni/file_list/train.txt
+    location2: data/adni
+    filelist2: data/adni/file_list/train.txt
     batch_size: 16
     shuffle: True
     pin_memory: False
@@ -65,9 +67,11 @@ DATA:
     jitter: 0.0
 
     # data loading
-    location: data/tet
-    filelist: data/tet/filelist/binary_test.txt
-    batch_size: 8
+    location: data/adni
+    filelist: data/adni/file_list/test.txt
+    location2: data/adni
+    filelist2: data/adni/file_list/test.txt
+    batch_size: 16
     shuffle: False
     pin_memory: False
     # num_workers: 0

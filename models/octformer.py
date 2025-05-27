@@ -13,22 +13,26 @@ from ocnn.octree import Octree
 from typing import Optional, List
 from torch.utils.checkpoint import checkpoint
 
-
+# import DualOctreeGNN.models.graph_resnet
 class OctreeT(Octree):
 
-  def __init__(self, octree: Octree, patch_size: int = 24, dilation: int = 4,
+  def __init__(self, octree: Octree, patch_size: int = 16, dilation: int = 4,
                nempty: bool = True, max_depth: Optional[int] = None,
                start_depth: Optional[int] = None, **kwargs):
     super().__init__(octree.depth, octree.full_depth)
     self.__dict__.update(octree.__dict__)
 
     self.patch_size = patch_size
-    self.dilation = dilation  # TODO dilation as a list
+    self.dilation = dilation
     self.nempty = nempty
     self.max_depth = max_depth or self.depth
     self.start_depth = start_depth or self.full_depth
     self.invalid_mask_value = -1e3
-    assert self.start_depth > 1
+    
+    # Ensure start_depth is at least 2 to avoid assertion error
+    self.start_depth = max(2, self.start_depth)
+    # Ensure max_depth is greater than start_depth
+    self.max_depth = max(self.start_depth + 1, self.max_depth)
 
     self.block_num = patch_size * dilation
     self.nnum_t = self.nnum_nempty if nempty else self.nnum
@@ -239,8 +243,8 @@ class OctreeAttention(torch.nn.Module):
 
 class OctFormerBlock(torch.nn.Module):
 
-  def __init__(self, dim: int, num_heads: int, patch_size: int = 32,
-               dilation: int = 0, mlp_ratio: float = 4.0, qkv_bias: bool = True,
+  def __init__(self, dim: int, num_heads: int, patch_size: int = 16,
+               dilation: int = 4, mlp_ratio: float = 4.0, qkv_bias: bool = True,
                qk_scale: Optional[float] = None, attn_drop: float = 0.0,
                proj_drop: float = 0.0, drop_path: float = 0.0, nempty: bool = True,
                activation: torch.nn.Module = torch.nn.GELU, **kwargs):
@@ -254,6 +258,7 @@ class OctFormerBlock(torch.nn.Module):
     self.cpe = OctreeDWConvBn(dim, nempty=nempty)
 
   def forward(self, data: torch.Tensor, octree: OctreeT, depth: int):
+    # print(self.cpe(data, octree, depth))
     data = self.cpe(data, octree, depth) + data
     attn = self.attention(self.norm1(data), octree, depth)
     data = data + self.drop_path(attn, octree, depth)
@@ -264,8 +269,8 @@ class OctFormerBlock(torch.nn.Module):
 
 class OctFormerStage(torch.nn.Module):
 
-  def __init__(self, dim: int, num_heads: int, patch_size: int = 32,
-               dilation: int = 0, mlp_ratio: float = 4.0, qkv_bias: bool = True,
+  def __init__(self, dim: int, num_heads: int, patch_size: int = 16,
+               dilation: int = 4, mlp_ratio: float = 4.0, qkv_bias: bool = True,
                qk_scale: Optional[float] = None, attn_drop: float = 0.0,
                proj_drop: float = 0.0, drop_path: float = 0.0, nempty: bool = True,
                activation: torch.nn.Module = torch.nn.GELU, interval: int = 6,
@@ -307,21 +312,42 @@ class PatchEmbed(torch.nn.Module):
     self.delta_depth = -num_down
     channels = [int(dim * 2**i) for i in range(-self.num_stages, 1)]
 
+    # print(f"PatchEmbed init - in_channels: {in_channels}, dim: {dim}, num_down: {num_down}")
+    # print(f"Channel progression: {channels}")
+
     self.convs = torch.nn.ModuleList([ocnn.modules.OctreeConvBnRelu(
         in_channels if i == 0 else channels[i], channels[i], kernel_size=[3],
         stride=1, nempty=nempty) for i in range(self.num_stages)])
+    
+    # Use stride 2 for all but keep kernel size consistent
     self.downsamples = torch.nn.ModuleList([ocnn.modules.OctreeConvBnRelu(
-        channels[i], channels[i+1], kernel_size=[2], stride=2, nempty=nempty)
+        channels[i], channels[i+1], kernel_size=[3], 
+        stride=2,  # Use stride 2 consistently
+        nempty=nempty)
         for i in range(self.num_stages)])
+    
+    # Final projection with larger kernel for better feature extraction
     self.proj = ocnn.modules.OctreeConvBnRelu(
         channels[-1], dim, kernel_size=[3], stride=1, nempty=nempty)
 
   def forward(self, data: torch.Tensor, octree: Octree, depth: int):
+    # print(f"PatchEmbed input - shape: {data.shape}, depth: {depth}")
+    
+    curr_depth = depth
     for i in range(self.num_stages):
-      depth_i = depth - i
-      data = self.convs[i](data, octree, depth_i)
-      data = self.downsamples[i](data, octree, depth_i)
-    data = self.proj(data, octree, depth_i - 1)
+        # Apply convolution at current depth
+        data = self.convs[i](data, octree, curr_depth)
+        # print(f"After conv {i} - shape: {data.shape}, depth: {curr_depth}")
+        
+        # Downsample to next depth
+        data = self.downsamples[i](data, octree, curr_depth)
+        curr_depth -= 1  # Track depth reduction
+        # print(f"After downsample {i} - shape: {data.shape}, depth: {curr_depth}")
+    
+    # Apply final projection at current depth
+    data = self.proj(data, octree, curr_depth)
+    # print(f"After final proj - shape: {data.shape}, depth: {curr_depth}")
+    
     return data
 
 
@@ -354,6 +380,7 @@ class OctFormer(torch.nn.Module):
     self.nempty = nempty
     self.num_stages = len(num_blocks)
     self.stem_down = stem_down
+    self.channels = channels  # Store channels as attribute
     drop_ratio = torch.linspace(0, drop_path, sum(num_blocks)).tolist()
 
     self.patch_embed = PatchEmbed(in_channels, channels[0], stem_down, nempty)
