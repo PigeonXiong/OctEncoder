@@ -4,6 +4,12 @@ This repository contains my customized implementation of **OctEncoder** for tetm
 
 ---
 
+## Acknowledgements  
+Parts of this code are adapted from OctFormer by Peng-Shuai Wang. The original author's information and license are kept.
+The modifications for this submission were made by the anonymous author. All information related to us is endacted.
+
+---
+
 ## Features
 - Octree-based transformer architecture for efficient 3D point cloud and tetmesh/trimesh processing
 - Masked Autoencoder (MAE) pre-training for self-supervised learning
