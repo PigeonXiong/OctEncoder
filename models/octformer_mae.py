@@ -30,7 +30,7 @@ class OctFormerMAE(nn.Module):
         self.encoder = OctFormer(
             in_channels, channels, num_blocks, num_heads, patch_size,
             dilation, drop_path, nempty, stem_down)
-        
+        print(f"-----Encoder initialized with channels: {channels}, num_blocks: {num_blocks}, num_heads: {num_heads}, patch_size: {patch_size}, dilation: {dilation}, drop_path: {drop_path}, nempty: {nempty}, stem_down: {stem_down}-----")
         # Parameters
         self.mask_ratio = mask_ratio
         self.decoder_dim = decoder_dim

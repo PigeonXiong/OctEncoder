@@ -7,6 +7,8 @@ logs
 *.xyz
 *.log
 *.pth
+*.ipynb
+notebooks
 dwconv
 mmdetection3d
 debug

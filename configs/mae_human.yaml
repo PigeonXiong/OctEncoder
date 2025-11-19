@@ -8,21 +8,39 @@
 SOLVER:
   gpu: 0,1,2,3
   run: train
-  logdir: logs/scannet/octformer
-  best_val: max:mIoU_part
+  logdir: logs/temp/test
 
-  ckpt_num: 20
-  max_epoch: 600
   test_every_epoch: 2
   log_per_iter: 25
+  eval_epoch: 1
+  max_epoch: 300
+  epochs: 300
 
+  # Learning rate settings
+  lr: 0.0001
+  lr_type: step
+  milestones: [100, 150]  # Changed to list format
+  warmup_epochs: 50
+  warmup_init: 0.00001
+  lr_min: 0.0001
+  lr_power: 0.9
+  
+  # Optimizer settings
   weight_decay: 0.05
-  type: adamw_attn
+  clip_grad: -1.0
+  
+  # Checkpointing
+  ckpt_num: 20
+  checkpoint: ""
+  resume: False
+  best_val: min:loss
 
-  lr: 0.0015
-  lr_type: step_warmup
-  milestones: (360,520)
-  port: 10001  # for distributed training
+  # Misc
+  batch_size: 6
+  #num_workers: 4
+  empty_cache: True
+  progress_bar: True
+  rand_seed: -1
 
 DATA:
   train:
@@ -42,11 +60,11 @@ DATA:
     cutmix: 0.0        # no cutmix
     crop_ratio: 0.8    # random ratio of random cropping
     max_npt: 120000    # max point number of random cropping
-
+    
     # data loading
     location: data/scannet.npz/train
     filelist: data/scannet.npz/scannetv2_train_npz.txt
-    batch_size: 4
+    batch_size: 6
     shuffle: True
     #num_workers: 4
 
@@ -73,22 +91,25 @@ DATA:
     filelist: data/scannet.npz/scannetv2_val_npz.txt
     batch_size: 1
     shuffle: False
-    #num_workers: 0
+    #num_workers: 4
 
 MODEL:
-  name: octsegformer
+  name: octformermae
   # N -> Normal (3 channels);
   # D -> Displacement (1 channel);
   # F -> Color (3 channels)
   # P -> Position (3 channels)
-  feature: NDFP
-  channel: 10
+  feature: NP
+  channel: 6
+  in_channels: 6
   nout: 21
   nempty: True
   interp: nearest
   sync_bn: True
   # find_unused_parameters: True
+  mask_ratio: 0.25
 
 LOSS:
-  mask: 0
-  num_class: 21
+  name: mae_loss
+  num_class: 21  # Not used for MAE but required by config
+  label_smoothing: 0.0 

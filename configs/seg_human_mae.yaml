@@ -8,21 +8,21 @@
 SOLVER:
   gpu: 0,1,2,3
   run: train
-  logdir: logs/scannet/octformer
+  logdir: logs/scannet/pretrain_NP_nofreeze
   best_val: max:mIoU_part
 
   ckpt_num: 20
-  max_epoch: 600
-  test_every_epoch: 2
-  log_per_iter: 25
+  max_epoch: 300
+  test_every_epoch: 4
+  log_per_iter: 20
 
   weight_decay: 0.05
   type: adamw_attn
 
   lr: 0.0015
   lr_type: step_warmup
-  milestones: (360,520)
-  port: 10001  # for distributed training
+  milestones: (100,200)
+  dist_url: tcp://localhost:10001  # for distributed training
 
 DATA:
   train:
@@ -42,13 +42,13 @@ DATA:
     cutmix: 0.0        # no cutmix
     crop_ratio: 0.8    # random ratio of random cropping
     max_npt: 120000    # max point number of random cropping
-
+    
     # data loading
     location: data/scannet.npz/train
     filelist: data/scannet.npz/scannetv2_train_npz.txt
     batch_size: 4
     shuffle: True
-    #num_workers: 4
+    num_workers: 0
 
   test:
     name: scannet
@@ -73,21 +73,24 @@ DATA:
     filelist: data/scannet.npz/scannetv2_val_npz.txt
     batch_size: 1
     shuffle: False
-    #num_workers: 0
+    num_workers: 2
 
 MODEL:
-  name: octsegformer
+  name: octformerseg_pretrain_mae
+  mae_ckpt: logs/scannet/mae_NP/best_model.pth
   # N -> Normal (3 channels);
   # D -> Displacement (1 channel);
   # F -> Color (3 channels)
   # P -> Position (3 channels)
-  feature: NDFP
-  channel: 10
+  feature: NP
+  channel: 6
   nout: 21
   nempty: True
   interp: nearest
   sync_bn: True
   # find_unused_parameters: True
+  # Freeze pretrained MAE or not
+  freeze_encoder: False
 
 LOSS:
   mask: 0

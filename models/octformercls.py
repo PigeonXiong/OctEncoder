@@ -78,11 +78,12 @@ class OctFormerCls(torch.nn.Module):
                  drop_path: float = 0.5, nempty: bool = True,
                  stem_down: int = 2, head_drop: float = 0.5, **kwargs):
         super().__init__()
-        self.biomarker_fc = nn.Linear(1, 1) 
-        self.fc = nn.Linear(out_channels + 1, out_channels)
+        #self.biomarker_fc = nn.Linear(1, 1)
+        #self.fc = nn.Linear(out_channels + 1, out_channels)
         self.backbone = OctFormer(
             in_channels, channels, num_blocks, num_heads, patch_size, dilation,
             drop_path, nempty, stem_down)
+        print(f"-----Encoder initialized with channels: {channels}, num_blocks: {num_blocks}, num_heads: {num_heads}, patch_size: {patch_size}, dilation: {dilation}, drop_path: {drop_path}, nempty: {nempty}, stem_down: {stem_down}-----")
         self.backbone2 = OctFormer(
             in_channels, channels, num_blocks, num_heads, patch_size, dilation,
             drop_path, nempty, stem_down)

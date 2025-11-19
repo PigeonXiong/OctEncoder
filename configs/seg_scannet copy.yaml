@@ -8,13 +8,13 @@
 SOLVER:
   gpu: 0,1,2,3
   run: train
-  logdir: logs/scannet/octformer
+  logdir: logs/seg/scannet_test_raw_surf
   best_val: max:mIoU_part
 
   ckpt_num: 20
   max_epoch: 600
   test_every_epoch: 2
-  log_per_iter: 25
+  log_per_iter: 10
 
   weight_decay: 0.05
   type: adamw_attn
@@ -22,7 +22,7 @@ SOLVER:
   lr: 0.0015
   lr_type: step_warmup
   milestones: (360,520)
-  port: 10001  # for distributed training
+  dist_url: tcp://localhost:10001  # for distributed training
 
 DATA:
   train:
@@ -42,13 +42,13 @@ DATA:
     cutmix: 0.0        # no cutmix
     crop_ratio: 0.8    # random ratio of random cropping
     max_npt: 120000    # max point number of random cropping
-
+    
     # data loading
-    location: data/scannet.npz/train
-    filelist: data/scannet.npz/scannetv2_train_npz.txt
-    batch_size: 4
+    location: data/HumanBody-NS-256-3
+    filelist: data/HumanBody-NS-256-3/train_raw_surf.txt
+    batch_size: 16
     shuffle: True
-    #num_workers: 4
+    num_workers: 0
 
   test:
     name: scannet
@@ -69,11 +69,11 @@ DATA:
     cutmix: 0.0   # no cutmix
 
     # data loading
-    location: data/scannet.npz/train
-    filelist: data/scannet.npz/scannetv2_val_npz.txt
+    location: data/HumanBody-NS-256-3
+    filelist: data/HumanBody-NS-256-3/test_raw_surf.txt
     batch_size: 1
     shuffle: False
-    #num_workers: 0
+    num_workers: 2
 
 MODEL:
   name: octsegformer
@@ -81,9 +81,9 @@ MODEL:
   # D -> Displacement (1 channel);
   # F -> Color (3 channels)
   # P -> Position (3 channels)
-  feature: NDFP
-  channel: 10
-  nout: 21
+  feature: NP
+  channel: 6
+  nout: 8
   nempty: True
   interp: nearest
   sync_bn: True
@@ -91,4 +91,4 @@ MODEL:
 
 LOSS:
   mask: 0
-  num_class: 21
+  num_class: 8

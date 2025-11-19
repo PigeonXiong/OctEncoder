@@ -6,9 +6,9 @@ SOLVER:
   gpu: 0,  # Single integer for GPU ID (not a tuple)
   run: train
   type: adamw
-  logdir: logs/temp/test
+  logdir: logs/ADNI/mae_simple1
 
-  test_every_epoch: 5
+  test_every_epoch: 10
   log_per_iter: 100
   eval_epoch: 1
   max_epoch: 300
@@ -43,19 +43,19 @@ SOLVER:
 DATA:
   train:
     name: tetmesh_mae
-    depth: 7
-    full_depth: 2
+    depth: 6
+    full_depth: 3
     adaptive: False
     uniform: False
     
     # Data loading
-    location: data/adni
-    filelist: data/adni/file_list/train.txt
-    location2: data/adni_tet
-    filelist2: data/adni_tet/file_list/train.txt
-    ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
-    batch_size: 32
-    # num_workers: 1
+    location: data/ADNI
+    filelist: data/ADNI/fps_train.txt
+    location2: data/ADNI
+    filelist2: data/ADNI/surface_train.txt
+    #ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
+    batch_size: 64
+    num_workers: 0
     in_memory: False
     take: -1
     
@@ -73,19 +73,19 @@ DATA:
 
   test:
     name: tetmesh_mae
-    depth: 7
-    full_depth: 2
+    depth: 6
+    full_depth: 3
     adaptive: False
     uniform: False
     
     # Data loading
-    location: data/adni
-    filelist: data/adni/file_list/test.txt
-    location2: data/adni_tet
-    filelist2: data/adni_tet/file_list/test.txt
-    ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
+    location: data/ADNI
+    filelist: data/ADNI/fps_test.txt
+    location2: data/ADNI
+    filelist2: data/ADNI/surface_test.txt
+    #ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
     batch_size: 32
-    # num_workers: 1
+    num_workers: 0
     in_memory: False
     take: -1
     
@@ -109,18 +109,18 @@ MODEL:
   nempty: true
   
   # Architecture parameters - Optimized for depth 7
-  channels: [64, 128]    # Progressive channel expansion
-  num_blocks: [2, 2]     # Multiple stages for hierarchical learning
-  num_heads: [4, 8]      # Heads scaled with channels
+  channels: [64, 64]    # Progressive channel expansion
+  num_blocks: [1, 1]     # Multiple stages for hierarchical learning
+  num_heads: [16, 16]      # Heads scaled with channels
   
   # MAE specific parameters
   mask_ratio: 0.5
   decoder_depth: 4
   decoder_num_heads: 8
-  decoder_dim: 256
-  patch_size: 32        # Larger patch size for better context
+  decoder_dim: 128
+  patch_size: 64        # Larger patch size for better context
   dilation: 4           # Larger dilation for spatial relationships
-  drop_path: 0.2      
+  drop_path: 0.0      
   stem_down: 2          # Keep minimal stem down
 
 LOSS:

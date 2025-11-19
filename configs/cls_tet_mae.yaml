@@ -11,7 +11,7 @@ SOLVER:
   type: adamw
   best_val: max:accu
 
-  logdir: logs/ADNI/octformer_d122_temp
+  logdir: logs/temp/test
   test_every_epoch: 1
   log_per_iter: 100
 
@@ -20,7 +20,7 @@ SOLVER:
 
   weight_decay: 0.01
   milestones: (100,150)
-  ckpt_num: 40
+  ckpt_num: 400
 
   checkpoint: ""  # Set to empty string to disable checkpoint loading
   resume: false    # Ensure we don't resume from checkpoint
@@ -28,8 +28,8 @@ SOLVER:
 DATA:
   train:
     # octree building
-    depth: 6
-    full_depth: 3
+    depth: 7
+    full_depth: 2
 
     # transformation
     orient_normal: xyz
@@ -42,24 +42,20 @@ DATA:
     jitter: 0.00
 
     # data loading
-    # location: data/adni
-    # filelist: data/adni/file_list/train.txt
-    # location2: data/adni_tet
-    # filelist2: data/adni_tet/file_list/train.txt
-    # ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
-    location: data/ADNI
-    filelist: data/ADNI/fps_train.txt
-    location2: data/ADNI
-    filelist2: data/ADNI/surface_train.txt
-    batch_size: 64
+    location: data/adni
+    filelist: data/adni/file_list/train.txt
+    location2: data/adni_tet
+    filelist2: data/adni_tet/file_list/train.txt
+    ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
+    batch_size: 16
     shuffle: True
-    pin_memory: False
-    num_workers: 0
+    pin_memory: True
+    # num_workers: 1
 
   test:
     # octree building
-    depth: 6
-    full_depth: 3
+    depth: 7
+    full_depth: 2
 
     # transformation
     orient_normal: xyz
@@ -72,27 +68,34 @@ DATA:
     jitter: 0.0
 
     # data loading
-    # location: data/adni
-    # filelist: data/adni/file_list/test.txt
-    # location2: data/adni_tet
-    # filelist2: data/adni_tet/file_list/test.txt
-    # ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
-    location: data/ADNI
-    filelist: data/ADNI/fps_test.txt
-    location2: data/ADNI
-    filelist2: data/ADNI/surface_test.txt
-    batch_size: 32
+    location: data/adni
+    filelist: data/adni/file_list/test.txt
+    location2: data/adni_tet
+    filelist2: data/adni_tet/file_list/test.txt
+    ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
+    batch_size: 16
     shuffle: False
     pin_memory: False
-    num_workers: 0
+    # num_workers: 1
 
 MODEL:
-  name: octformercls
+  name: octformercls_pretrain_mae
   nout: 2
   channel: 3
-  # nempty: True
-  feature: P   # N -> Normal (3 channels);
-                # D -> Local displacement (1 channel)
+  # nempty: True    # different from MAE
+  feature: P  # N -> Normal (3 channels); D -> Local displacement (1 channel)
+  mae_ckpt: logs/temp/mae_d122/best_model.pth
+  # Make sure the following parameters match the MAE model
+  channels: [64, 128]
+  num_blocks: [2, 2]
+  num_heads: [4, 8]
+  patch_size: 32
+  dilation: 4
+  drop_path: 0.2
+  stem_down: 2
+  # Freeze pretrained MAE or not
+  freeze_encoder: false
+
 
 LOSS:
   num_class: 2

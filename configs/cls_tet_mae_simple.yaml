@@ -11,7 +11,7 @@ SOLVER:
   type: adamw
   best_val: max:accu
 
-  logdir: logs/ADNI/octformer_d122_temp
+  logdir: logs/ADNI/octformer_mae_nofreeze
   test_every_epoch: 1
   log_per_iter: 100
 
@@ -20,7 +20,7 @@ SOLVER:
 
   weight_decay: 0.01
   milestones: (100,150)
-  ckpt_num: 40
+  ckpt_num: 400
 
   checkpoint: ""  # Set to empty string to disable checkpoint loading
   resume: false    # Ensure we don't resume from checkpoint
@@ -42,16 +42,12 @@ DATA:
     jitter: 0.00
 
     # data loading
-    # location: data/adni
-    # filelist: data/adni/file_list/train.txt
-    # location2: data/adni_tet
-    # filelist2: data/adni_tet/file_list/train.txt
-    # ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
     location: data/ADNI
     filelist: data/ADNI/fps_train.txt
     location2: data/ADNI
     filelist2: data/ADNI/surface_train.txt
-    batch_size: 64
+    #ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
+    batch_size: 32
     shuffle: True
     pin_memory: False
     num_workers: 0
@@ -72,27 +68,34 @@ DATA:
     jitter: 0.0
 
     # data loading
-    # location: data/adni
-    # filelist: data/adni/file_list/test.txt
-    # location2: data/adni_tet
-    # filelist2: data/adni_tet/file_list/test.txt
-    # ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
     location: data/ADNI
     filelist: data/ADNI/fps_test.txt
     location2: data/ADNI
     filelist2: data/ADNI/surface_test.txt
+    #ptau_csv_path: data/patu_files/data_split_ptau_cutoff.csv
     batch_size: 32
     shuffle: False
     pin_memory: False
     num_workers: 0
 
 MODEL:
-  name: octformercls
+  name: octformercls_pretrain_mae
   nout: 2
   channel: 3
-  # nempty: True
-  feature: P   # N -> Normal (3 channels);
-                # D -> Local displacement (1 channel)
+  # nempty: True    # different from MAE
+  feature: P  # N -> Normal (3 channels); D -> Local displacement (1 channel)
+  mae_ckpt: logs/ADNI/mae_simple1/best_model.pth
+  # Make sure the following parameters match the MAE model
+  channels: [64, 64]
+  num_blocks: [1, 1]
+  num_heads: [16, 16]
+  patch_size: 64
+  dilation: 4
+  drop_path: 0.0
+  stem_down: 2
+  # Freeze pretrained MAE or not
+  freeze_encoder: false
+
 
 LOSS:
   num_class: 2

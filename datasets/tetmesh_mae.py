@@ -6,6 +6,8 @@ from ocnn.octree import Points
 from ocnn.dataset import CollateBatch
 from .utils import ReadPly, Transform
 
+from datasets.TetDataset import TetDataset
+
 
 class TetTransformMAE(Transform):
     def preprocess(self, sample: dict, idx: int):
@@ -35,11 +37,11 @@ def get_tetmesh_dataset_mae(flags):
     transform2 = TetTransformMAE(flags)
     collate_batch = CollateBatch()
     
-    dataset = Dataset(
+    dataset = TetDataset(
         flags.location, flags.location2,
         flags.filelist, flags.filelist,
         transform, transform2,
         read_file=read_file,
-        take=flags.take if hasattr(flags, 'take') else -1)
-    
+        take=flags.take if hasattr(flags, 'take') else -1,
+        ptau_csv_path=flags.ptau_csv_path if hasattr(flags, 'ptau_csv_path') else None) 
     return dataset, collate_batch 

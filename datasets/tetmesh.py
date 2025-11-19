@@ -7,6 +7,7 @@ from ocnn.dataset import CollateBatch
 import pdb
 from .utils import ReadPly, Transform
 
+from datasets.TetDataset import TetDataset
 
 
 class TetTransform(Transform):
@@ -44,8 +45,13 @@ def get_tetmesh_dataset(flags):
   transform2 = TetTransform(flags)
   collate_batch = CollateBatch()
   # print(flags.adaptive)
-  dataset = Dataset(flags.location,flags.location2, flags.filelist,flags.filelist, transform,transform2,
-                    read_file=read_file, take=flags.take)
+  dataset = TetDataset(
+    flags.location, flags.location2,
+    flags.filelist, flags.filelist,
+    transform, transform2,
+    read_file=read_file,
+    take=flags.take if hasattr(flags, 'take') else -1,
+    ptau_csv_path=flags.ptau_csv_path if hasattr(flags, 'ptau_csv_path') else None)
   # print(dataset[1])
   # pdb.set_trace()
   return dataset, collate_batch

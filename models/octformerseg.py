@@ -78,6 +78,7 @@ class OctFormerSeg(torch.nn.Module):
     self.backbone = OctFormer(
         in_channels, channels, num_blocks, num_heads, patch_size, dilation,
         drop_path, nempty, stem_down)
+    print(f"-----Encoder initialized with channels: {channels}, num_blocks: {num_blocks}, num_heads: {num_heads}, patch_size: {patch_size}, dilation: {dilation}, drop_path: {drop_path}, nempty: {nempty}, stem_down: {stem_down}-----")
     self.head = SegHeader(
         out_channels, channels, fpn_channel, nempty, head_up, head_drop)
     self.apply(self.init_weights)
@@ -90,6 +91,7 @@ class OctFormerSeg(torch.nn.Module):
 
   def forward(self, data: torch.Tensor, octree: Octree, depth: int,
               query_pts: torch.Tensor):
+    #print(f"-----Forward pass with data shape: {data.shape}, octree depth: {depth}, query_pts shape: {query_pts.shape}-----")
     features = self.backbone(data, octree, depth)
     output = self.head(features, octree, query_pts)
     return output
