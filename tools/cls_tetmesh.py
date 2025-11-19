@@ -62,7 +62,7 @@ args = parser.parse_args()
 # Set the root folder where your tetmesh data is located.
 # For example, update this path to point to your tetmesh directory.
 # In your case, your files are under data/tet/points.
-root_folder = "/home/local/ASURITE/mfarazi/Mohammad/ColabNotebooks/ColabNotebooks/data/tet"
+root_folder = "data/tet"
 # Use root_folder as the input folder.
 input_folder = root_folder  
 # Define the folder to save the generated PLY files.

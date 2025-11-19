@@ -178,4 +178,4 @@ def prepare_dataset(root_folder: str, sample_num: int = 4096, normalize: bool = 
             )
 
 # Example usage
-prepare_dataset("/home/asurite.ad.asu.edu/yxiong42/Downloads/HumanBody-NS-256-3/train", sample_num=4096, normalize=True)
+prepare_dataset("HumanBody-NS-256-3/train", sample_num=4096, normalize=True)

@@ -3,7 +3,7 @@ import open3d as o3d
 # 1. Load your point cloud (adjust the file path and format as needed)
 
 # Load the colored point cloud
-pcd = o3d.io.read_point_cloud("/home/local/ASURITE/mfarazi/Mohammad/ColabNotebooks/ColabNotebooks/octformer/data/tet/points/m002S5230L062713S63TCF/m002S5230L062713S63TCF.ply")
+pcd = o3d.io.read_point_cloud("tet/points/m002S5230L062713S63TCF/m002S5230L062713S63TCF.ply")
 
 # Check if the point cloud has colors
 if not pcd.has_colors():

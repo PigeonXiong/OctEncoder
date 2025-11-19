@@ -1,14 +1,14 @@
-# OctFormer: Octree-based Transformers for 3D Tetmeshes (TetMesh Edition)
+# OctEncoder: Octree-based Transformers MAE for 3D Tetmeshes and TriMesh
 
-This repository contains my customized implementation of **OctFormer** for tetrahedral mesh (tetmesh) data. 
+This repository contains my customized implementation of **OctEncoder** for tetmesh and trimesh data. 
 
 ---
 
 ## Features
-- Octree-based transformer architecture for efficient 3D point cloud and tetmesh processing
+- Octree-based transformer architecture for efficient 3D point cloud and tetmesh/trimesh processing
 - Masked Autoencoder (MAE) pre-training for self-supervised learning
 - Support for tetrahedral mesh (tetmesh) data
-- Custom training and evaluation scripts for tetmesh classification
+- Custom training and evaluation scripts for tetmesh classification and trimesh segmentation
 
 ---
 
@@ -27,7 +27,7 @@ Tested on Ubuntu 20.04 with Nvidia GPUs.
     ```
 3. Clone this repository and install requirements:
     ```bash
-    git clone https://github.com/mfarazi1991/tetoctformer.git
+    git clone https://github.com/unknownuser/thisrepo.git
     cd tetoctformer
     pip install -r requirements.txt
     ```
@@ -44,6 +44,7 @@ Tested on Ubuntu 20.04 with Nvidia GPUs.
 ### Data Preparation
 - Place your tetmesh data in the `data/adni` directory.
 - Update the file lists in `data/adni/file_list/train.txt` and `data/adni/file_list/test.txt` as needed.
+- The pre-processed data is not provided in this stage, but will be provided upon acceptance
 
 ### Pre-training (MAE)
 Run masked autoencoder pre-training on tetmesh data:
@@ -56,12 +57,3 @@ Train a classifier on tetmesh data:
 ```bash
 python classification.py --config configs/cls_tet.yaml SOLVER.gpu 0,
 ```
-
----
-
-```
-
----
-
-## Notes
-
